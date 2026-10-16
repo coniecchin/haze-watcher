@@ -1,0 +1,6 @@
+{
+  "name": "SG AirPulse - Singapore Live PSI & Hazardous Air Alert System",
+  "description": "Real-time Singapore PSI & PM2.5 air quality tracker with interactive regional map, hazardous threshold alerts, and health advisories.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
