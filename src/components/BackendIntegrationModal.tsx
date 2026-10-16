@@ -93,6 +93,30 @@ export async function checkAirQualityAndPush() {
 
         {/* Content */}
         <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+          {/* Live Serverless Endpoints in /api */}
+          <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                Active Serverless Endpoints (No Key Required)
+              </span>
+              <span className="text-[11px] font-mono text-cyan-400/80">Folder: /api</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <div className="font-mono text-cyan-300 font-bold text-[11px]">GET /api/two-hr-forecast</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Pulls live area weather from data.gov.sg</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <div className="font-mono text-cyan-300 font-bold text-[11px]">GET /api/psi</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Pulls live regional 24-hr PSI & sub-indices</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                <div className="font-mono text-cyan-300 font-bold text-[11px]">GET /api/health</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Uptime & upstream reachability probe</div>
+              </div>
+            </div>
+          </div>
+
           {/* Architecture Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
@@ -101,7 +125,7 @@ export async function checkAirQualityAndPush() {
                 <span>1. NEA Open Data</span>
               </div>
               <p className="text-slate-400 text-[11px]">
-                Cron worker queries <code>api.data.gov.sg/v1/environment/psi</code> every 15 minutes.
+                Serverless handlers query <code>api-open.data.gov.sg/v2/real-time/api/two-hr-forecast</code> and PSI endpoints without API keys.
               </p>
             </div>
 

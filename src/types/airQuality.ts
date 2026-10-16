@@ -29,6 +29,22 @@ export interface RegionalReading {
   historical24h: { hour: string; psi: number; pm25: number }[];
 }
 
+export interface TwoHrWeatherForecast {
+  validPeriod: {
+    start: string;
+    end: string;
+    text: string;
+  };
+  dominantCondition: string;
+  rainDetected: boolean;
+  rainAreas: string[];
+  clearAreas: string[];
+  forecasts: Array<{
+    area: string;
+    forecast: string;
+  }>;
+}
+
 export interface AirQualityData {
   timestamp: string; // ISO string
   updateTimestamp: string; // formatted
@@ -45,6 +61,7 @@ export interface AirQualityData {
   nationalPm25: number;
   dominantPollutant: string;
   highestRegion: RegionKey;
+  twoHrForecast?: TwoHrWeatherForecast;
 }
 
 export interface AlertRule {

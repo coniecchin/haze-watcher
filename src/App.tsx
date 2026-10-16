@@ -41,6 +41,7 @@ import {
   Compass,
   Flame,
   CheckCircle2,
+  CloudRain,
 } from 'lucide-react';
 
 // Default starter alert rules according to NEA Singapore health threshold standards
@@ -393,6 +394,46 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* Live 2-Hour Weather & Rain Washout Ribbon (from api-open.data.gov.sg/v2/real-time/api/two-hr-forecast) */}
+          {data.twoHrForecast && (
+            <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
+              <div className="flex items-center gap-2.5">
+                <div className={`p-1.5 rounded-lg border shrink-0 ${
+                  data.twoHrForecast.rainDetected
+                    ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
+                    : 'bg-slate-800 border-slate-700 text-slate-300'
+                }`}>
+                  <CloudRain className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-200">
+                      2-Hour Singapore Forecast: {data.twoHrForecast.dominantCondition}
+                    </span>
+                    <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/50 px-1.5 py-0.5 rounded border border-cyan-800/50">
+                      {data.twoHrForecast.validPeriod.text}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    {data.twoHrForecast.rainDetected ? (
+                      <span className="text-sky-300">
+                        Rain detected in {data.twoHrForecast.rainAreas.slice(0, 4).join(', ')}
+                        {data.twoHrForecast.rainAreas.length > 4 ? ` (+${data.twoHrForecast.rainAreas.length - 4} more)` : ''} — natural particulate washout occurring
+                      </span>
+                    ) : (
+                      <span>No active precipitation detected across Singapore sectors</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono text-slate-400 shrink-0">
+                <span className="text-slate-500">Live API:</span>
+                <span className="text-cyan-400">/api/two-hr-forecast</span>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Section 2: Interactive Singapore Air Quality Map */}

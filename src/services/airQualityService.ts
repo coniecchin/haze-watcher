@@ -171,8 +171,15 @@ export async function fetchLiveAirQualityData(scenario: SimulationScenario = 'LI
     const pm25Promise = fetch('https://api.data.gov.sg/v1/environment/pm25', {
       headers: { Accept: 'application/json' },
     });
+    const forecastPromise = fetch('/api/two-hr-forecast', {
+      headers: { Accept: 'application/json' },
+    }).catch(() =>
+      fetch('https://api-open.data.gov.sg/v2/real-time/api/two-hr-forecast', {
+        headers: { Accept: 'application/json' },
+      })
+    );
 
-    const [psiRes, pm25Res] = await Promise.allSettled([psiPromise, pm25Promise]);
+    const [psiRes, pm25Res, forecastRes] = await Promise.allSettled([psiPromise, pm25Promise, forecastPromise]);
 
     if (psiRes.status !== 'fulfilled' || !psiRes.value.ok) {
       console.warn('NEA PSI API call failed or rate limited; using baseline authentic data');
@@ -181,9 +188,42 @@ export async function fetchLiveAirQualityData(scenario: SimulationScenario = 'LI
 
     const psiJson = await psiRes.value.json();
     let pm25Json: Record<string, unknown> | null = null;
+    let twoHrForecastData: any = undefined;
 
     if (pm25Res.status === 'fulfilled' && pm25Res.value.ok) {
       pm25Json = await pm25Res.value.json();
+    }
+
+    if (forecastRes.status === 'fulfilled' && forecastRes.value.ok) {
+      try {
+        const fJson = await forecastRes.value.json();
+        if (fJson.summary && fJson.validPeriod) {
+          twoHrForecastData = {
+            validPeriod: fJson.validPeriod,
+            dominantCondition: fJson.summary.dominantCondition,
+            rainDetected: fJson.summary.rainDetected,
+            rainAreas: fJson.summary.rainAreas || [],
+            clearAreas: fJson.summary.clearAreas || [],
+            forecasts: fJson.forecasts || [],
+          };
+        } else if (fJson.data?.items?.[0]) {
+          const item = fJson.data.items[0];
+          const forecasts = item.forecasts || [];
+          const rain = forecasts.filter((f: any) =>
+            ['rain', 'showers'].some((w) => f.forecast.toLowerCase().includes(w))
+          ).map((f: any) => f.area);
+          twoHrForecastData = {
+            validPeriod: item.valid_period || { text: 'Next 2 Hours' },
+            dominantCondition: forecasts[0]?.forecast || 'Cloudy',
+            rainDetected: rain.length > 0,
+            rainAreas: rain,
+            clearAreas: forecasts.filter((f: any) => !rain.includes(f.area)).map((f: any) => f.area),
+            forecasts,
+          };
+        }
+      } catch (err) {
+        console.warn('Could not parse 2-hr forecast:', err);
+      }
     }
 
     const items = psiJson?.items?.[0];
@@ -259,6 +299,7 @@ export async function fetchLiveAirQualityData(scenario: SimulationScenario = 'LI
       nationalPm25: Number(pm25_1h.national) || readings.central?.pm25OneHourly || 22,
       dominantPollutant: 'PM2.5 (Fine Particulate Matter)',
       highestRegion,
+      twoHrForecast: twoHrForecastData,
     };
   } catch (err) {
     console.warn('Error fetching live NEA data, using synthetic baseline:', err);
